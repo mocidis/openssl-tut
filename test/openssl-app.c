@@ -4,24 +4,29 @@
 
 
 int main() {
-    char *key = "01234567890123456789012345678901";
-    char *iv = "01234567890123456"; //If key is one time pass then iv can be null or fixed
-    char plaintext[] = "The quick brown fox jumps over the lazy dog";
-    char ciphertext[128];
-    char decryptedtext[128];
+    char plaintext[] = "T12340";
+    char ciphertext[100];
+    char decryptedtext[100];
 
+    int plaintext_len;
     int ciphertext_len;
     int decryptedtext_len;
 
-    ciphertext_len = encrypt(plaintext, strlen(plaintext), key, iv, ciphertext);
+    char pph[]="abcxyz";
+    char timestamp[]="26/1/2016 16:00:00";
+    
+    plaintext_len = strlen(plaintext);
+    adv_encrypt(ciphertext, &ciphertext_len, plaintext, plaintext_len, pph, timestamp);
     printf("Ciphertext is:\n");
     BIO_dump_fp (stdout, (const char *)ciphertext, ciphertext_len);
+    printf("Ciphertext length: %d\n", ciphertext_len);
 
-    decryptedtext_len = decrypt(ciphertext, ciphertext_len, key, iv, decryptedtext);
+    printf("====================================\n");
+
+    adv_decrypt(decryptedtext, &decryptedtext_len, ciphertext, ciphertext_len, pph, timestamp);
     decryptedtext[decryptedtext_len] = '\0';
-
     printf("Decrypted text is:\n");
     printf("%s\n", decryptedtext);
-
+    printf("Decrypted text length: %d\n", decryptedtext_len);
     return 0;
 }

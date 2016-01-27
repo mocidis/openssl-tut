@@ -1,37 +1,63 @@
 #include "my-openssl.h"
+#include <string.h>
+#include <openssl/md5.h>
 
-int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key, unsigned char *iv, unsigned char *ciphertext) {
-    EVP_CIPHER_CTX *ctx;
-    int len;
-    int ciphertext_len;
+char salt[] = "salt is better than sugar";
 
-    ctx = EVP_CIPHER_CTX_new();
-    EVP_EncryptInit(ctx, EVP_aes_256_cbc(), key, iv);
-    EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len);
-    ciphertext_len = len;
-    EVP_EncryptFinal_ex(ctx, ciphertext + len,  &len);
-    ciphertext_len += len;
+void generate_otp(unsigned char *key, char *pph, char *timestamp, char *salt) {
+#if 1
+    int i, n;
+    MD5_CTX ctx;
+    char data[100];
 
-    EVP_CIPHER_CTX_free(ctx);
-    printf("Encrypted Done! ");
-    return ciphertext_len;
+    n = sprintf(data, "%s%s%s", pph, timestamp, salt);
+
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, data, strlen(data));
+    MD5_Final(key, &ctx);
+#endif
 }
 
-int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key, unsigned char *iv, unsigned char *plaintext) {
+void adv_encrypt(unsigned char *ciphertext, int *ciphertext_len, unsigned char *plaintext, int plaintext_len, char *pph, char *timestamp) {
     EVP_CIPHER_CTX *ctx;
-    int len;
-    int plaintext_len;
+    int i = 0, len;
+    int temp;
+    char key1[MD5_DIGEST_LENGTH + 2]; //defined in md5.h, MD5_DIGEST_LENGTH = 16
+
+    generate_otp(key1, pph, timestamp, salt);
 
     ctx = EVP_CIPHER_CTX_new();
-    EVP_DecryptInit(ctx, EVP_aes_256_cbc(), key, iv);
+    EVP_EncryptInit(ctx, EVP_aes_128_cbc(), key1, NULL);
+    EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len);
+    temp = len;
+    EVP_EncryptFinal_ex(ctx, ciphertext + len,  &len);
+    temp += len;
+
+    *ciphertext_len = temp;
+    
+    EVP_CIPHER_CTX_free(ctx);
+    printf("Encrypted Done! ");
+}
+
+void adv_decrypt(unsigned char *plaintext, int *plaintext_len, unsigned char *ciphertext, int ciphertext_len, char *pph, char *timestamp) {
+    EVP_CIPHER_CTX *ctx;
+    int i, len;
+    int temp;
+    char key2[MD5_DIGEST_LENGTH + 2];
+
+    generate_otp(key2, pph, timestamp, salt);
+
+    ctx = EVP_CIPHER_CTX_new();
+    
+    EVP_DecryptInit(ctx, EVP_aes_128_cbc(), key2, NULL);
     EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len);
-    plaintext_len = len;
-    EVP_DecryptFinal(ctx, ciphertext + len,  &len);
-    plaintext_len += len;
+    temp = len;
+    EVP_DecryptFinal(ctx, plaintext + len,  &len);
+    temp += len;
+
+    *plaintext_len = temp;
 
     EVP_CIPHER_CTX_free(ctx);
     printf("Decrypted Done! ");
-    return plaintext_len;
 }
-
 
