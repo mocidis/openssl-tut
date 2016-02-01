@@ -6,7 +6,7 @@ char salt[] = "salt is better than sugar";
 
 void generate_otp(unsigned char *key, char *pph, char *timestamp, char *salt) {
 #if 1
-    int i, n;
+    int n;
     MD5_CTX ctx;
     char data[100];
 
@@ -20,9 +20,9 @@ void generate_otp(unsigned char *key, char *pph, char *timestamp, char *salt) {
 
 void adv_encrypt(unsigned char *ciphertext, int *ciphertext_len, unsigned char *plaintext, int plaintext_len, char *pph, char *timestamp) {
     EVP_CIPHER_CTX *ctx;
-    int i = 0, len;
+    int len;
     int temp;
-    char key1[MD5_DIGEST_LENGTH + 2]; //defined in md5.h, MD5_DIGEST_LENGTH = 16
+    unsigned char key1[MD5_DIGEST_LENGTH]; //defined in md5.h, MD5_DIGEST_LENGTH = 16
 
     generate_otp(key1, pph, timestamp, salt);
 
@@ -41,9 +41,9 @@ void adv_encrypt(unsigned char *ciphertext, int *ciphertext_len, unsigned char *
 
 void adv_decrypt(unsigned char *plaintext, int *plaintext_len, unsigned char *ciphertext, int ciphertext_len, char *pph, char *timestamp) {
     EVP_CIPHER_CTX *ctx;
-    int i, len;
+    int len;
     int temp;
-    char key2[MD5_DIGEST_LENGTH + 2];
+    unsigned char key2[MD5_DIGEST_LENGTH];
 
     generate_otp(key2, pph, timestamp, salt);
 

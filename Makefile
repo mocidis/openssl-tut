@@ -9,7 +9,7 @@ O_DIR:=.
 
 LIBS := $(shell pkg-config libpjproject --libs) -lcrypto
 
-CFLAGS :=-I$(MAIN_DIR)/include
+CFLAGS :=-I$(MAIN_DIR)/include -Wall
 
 all: $(APP)
 
